@@ -6,7 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import passport from "./config/passport.js";
 import userRoutes from "./routes/userRoutes.js";
 import roleTestRoutes from "./routes/roleTestRoutes.js";
-
+import adminRoutes from "./routes/adminRoutes.js";
 
 
 
@@ -27,6 +27,7 @@ app.use("/api/test", roleTestRoutes);
 
 app.use("/api/users", userRoutes);
 
+app.use("/api/admin", adminRoutes);
 
 
 app.get("/", (req, res) => {
