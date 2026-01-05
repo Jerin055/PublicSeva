@@ -23,6 +23,20 @@ export const signupUser = async (userData) => {
   //  Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  if (!name || !email || !password) {
+    throw new Error("Name, email, and password are required");
+  }
+
+  if (password.length < 6) {
+    throw new Error("Password must be at least 6 characters long");
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error("Invalid email format");
+  }
+
+
   //  Create user
   const user = await User.create({
     name,
