@@ -48,7 +48,7 @@ const issueSchema = new mongoose.Schema(
       required: true
     },
 
-    likes: [
+    votes: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
