@@ -7,8 +7,7 @@ import passport from "./config/passport.js";
 import userRoutes from "./routes/userRoutes.js";
 import roleTestRoutes from "./routes/roleTestRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-
-
+import issueRoutes from "./routes/issueRoutes.js";
 
 
 dotenv.config();
@@ -19,15 +18,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Use passport based auth
 app.use(passport.initialize());
 
-
+// Call all authentication API routes
 app.use("/api/auth", authRoutes);
+
+// Call all role-test api routes
 app.use("/api/test", roleTestRoutes);
 
+// call all user-related api routes
 app.use("/api/users", userRoutes);
 
+// call all admin-related api routes
 app.use("/api/admin", adminRoutes);
+
+// call all issue-related api routes
+app.use("/api/issues", issueRoutes);
 
 
 app.get("/", (req, res) => {
