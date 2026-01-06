@@ -10,9 +10,9 @@ const STATUS_FLOW = {
 };
 
 /**
- * @desc    Get all issues (admin/coordinator view)
+ * @desc    Get all issues (admin view)
  * @route   GET /api/admin/issues
- * @access  Admin, Coordinator
+ * @access  Admin
  */
 export const getAllIssuesAdmin = async (req, res) => {
   try {
@@ -36,7 +36,7 @@ export const getAllIssuesAdmin = async (req, res) => {
 /**
  * @desc    Update issue status
  * @route   PATCH /api/admin/issues/:id/status
- * @access  Admin, Coordinator
+ * @access  Admin
  */
 export const updateIssueStatus = async (req, res) => {
   try {

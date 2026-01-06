@@ -14,14 +14,6 @@ export default function LandingPage() {
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect logged-in users
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/citizen/home");
-    }
-  }, [navigate]);
-
   // Dark mode toggle
   useEffect(() => {
     if (darkMode) {

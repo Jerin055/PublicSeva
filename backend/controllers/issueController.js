@@ -7,22 +7,26 @@ import Issue from "../models/Issue.js";
  */
 export const createIssue = async (req, res) => {
   try {
-    const { title, description, images, location, address } = req.body;
+    const { title, description, address, lat, lng } = req.body;
 
-    if (!title || !description || !location?.coordinates) {
+    // basic validation
+    if (!title || !description || !lat || !lng || !req.file) {
       return res.status(400).json({
         success: false,
-        message: "Title, description, and location are required"
+        message: "Title, description, image, and location are required"
       });
     }
 
     const issue = await Issue.create({
       title,
       description,
-      images: images || [],
-      location,
+      images: [req.file.path], 
       address,
-      createdBy: req.user.id // 🔑 critical
+      location: {
+        type: "Point",
+        coordinates: [Number(lng), Number(lat)]
+      },
+      createdBy: req.user.id 
     });
 
     res.status(201).json({
@@ -30,6 +34,7 @@ export const createIssue = async (req, res) => {
       issue
     });
   } catch (err) {
+    console.error("CREATE ISSUE ERROR:", err.message);
     res.status(500).json({
       success: false,
       message: err.message

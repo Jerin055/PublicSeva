@@ -38,21 +38,6 @@ router.get(
   }
 );
 
-/**
- * @route   GET /api/test/coordinator
- * @access  Coordinator only
- */
-router.get(
-  "/coordinator",
-  authMiddleware,
-  roleMiddleware("coordinator"),
-  (req, res) => {
-    res.json({
-      success: true,
-      message: "Coordinator access granted",
-      user: req.user
-    });
-  }
-);
+
 
 export default router;

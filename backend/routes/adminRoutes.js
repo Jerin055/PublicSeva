@@ -9,12 +9,12 @@ import {
 const router = express.Router();
 
 /**
- * Admin / Coordinator issue dashboard
+ * Admin issue dashboard
  */
 router.get(
   "/issues",
   authMiddleware,
-  allowRoles("admin", "coordinator"),
+  allowRoles("admin"),
   getAllIssuesAdmin
 );
 
@@ -24,7 +24,7 @@ router.get(
 router.patch(
   "/issues/:id/status",
   authMiddleware,
-  allowRoles("admin", "coordinator"),
+  allowRoles("admin"),
   updateIssueStatus
 );
 

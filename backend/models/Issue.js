@@ -2,23 +2,11 @@ import mongoose from "mongoose";
 
 const issueSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true
-    },
+    title: { type: String, required: true, trim: true },
 
-    description: {
-      type: String,
-      required: true
-    },
+    description: { type: String, required: true },
 
-    images: [
-      {
-        type: String, // URL (Cloudinary, S3, local, etc.)
-        required: true
-      }
-    ],
+    images: [{ type: String, required: true }],
 
     location: {
       type: {
@@ -32,9 +20,7 @@ const issueSchema = new mongoose.Schema(
       }
     },
 
-    address: {
-      type: String
-    },
+    address: String,
 
     status: {
       type: String,
@@ -48,29 +34,33 @@ const issueSchema = new mongoose.Schema(
       required: true
     },
 
-    votes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-      }
-    ],
+    votes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
     comments: [
       {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User"
-        },
-        text: {
-          type: String,
-          required: true
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now
-        }
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        text: String,
+        createdAt: { type: Date, default: Date.now }
       }
-    ]
+    ],
+
+    /* 🔥 AI FIELDS */
+    aiSeverity: {
+      label: {
+        type: String,
+        enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+      },
+      score: {
+        type: Number // mapped numeric score
+      },
+      reason: String
+    },
+
+    /* 🔥 FINAL COMPUTED SEVERITY */
+    severityScore: {
+      type: Number,
+      default: 0
+    }
   },
   { timestamps: true }
 );

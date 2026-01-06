@@ -3,6 +3,9 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CitizenHome from "./pages/citizen/Home";
+import ReportIssue from "./pages/citizen/ReportIssue";
+
 
 function App() {
   return (
@@ -16,7 +19,7 @@ function App() {
           path="/citizen/home"
           element={
             <ProtectedRoute allowedRoles={["citizen"]}>
-              <div>Citizen Dashboard</div>
+              <CitizenHome />
             </ProtectedRoute>
           }
         />
@@ -29,6 +32,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/citizen/report" element={<ReportIssue />} />
+
       </Routes>
     </BrowserRouter>
   );

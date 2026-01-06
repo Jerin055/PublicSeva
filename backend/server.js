@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import roleTestRoutes from "./routes/roleTestRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import issueRoutes from "./routes/issueRoutes.js";
+import uploadTestRoutes from "./routes/uploadTest.js";
 
 
 dotenv.config();
@@ -35,6 +36,8 @@ app.use("/api/admin", adminRoutes);
 
 // call all issue-related api routes
 app.use("/api/issues", issueRoutes);
+
+
 
 
 app.get("/", (req, res) => {
