@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
+import upload from "../middleware/upload.js";
 import {
   createIssue,
   getAllIssues,
@@ -11,7 +12,7 @@ import {
 
 const router = express.Router();
 
-router.post("/", authMiddleware, createIssue);
+router.post( "/",authMiddleware,upload.single("image"),createIssue);
 router.get("/", getAllIssues);
 router.get("/:id", getIssueById);
 router.get("/user/:userId", getIssuesByUser);

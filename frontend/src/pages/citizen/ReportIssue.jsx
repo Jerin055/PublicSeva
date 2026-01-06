@@ -1,31 +1,43 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import CitizenNavbar from "../../components/CitizenNavbar";
 import Footer from "../../components/Footer";
-import { Upload, MapPin } from "lucide-react";
+import { Upload } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { createIssue } from "../../services/issueApi";
 
 export default function ReportIssue() {
-  // ---------------- IMAGE STATE ----------------
+  const navigate = useNavigate();
+
+  // ---------- FORM STATE ----------
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [address, setAddress] = useState("");
+
+  // ---------- IMAGE STATE ----------
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // ---------------- MAP STATE ----------------
+  // ---------- MAP STATE ----------
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const [coords, setCoords] = useState(null);
 
-  // ---------------- IMAGE HANDLER ----------------
+  // ---------- UI STATE ----------
+  const [loading, setLoading] = useState(false);
+
+  // ---------- IMAGE HANDLER ----------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setImage(file); // later send to backend
-    setPreview(URL.createObjectURL(file)); // preview
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
   };
 
-  // ---------------- MAP INITIALIZATION ----------------
+  // ---------- MAP INITIALIZATION ----------
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -62,7 +74,34 @@ export default function ReportIssue() {
     };
   }, []);
 
-  // ---------------- UI ----------------
+  // ---------- SUBMIT HANDLER ----------
+  const handleSubmit = async () => {
+    if (!image || !coords || !title || !description) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("address", address);
+    formData.append("lat", coords.lat);
+    formData.append("lng", coords.lng);
+
+    try {
+      setLoading(true);
+      await createIssue(formData);
+      navigate("/citizen/home");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit issue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------- UI ----------
   return (
     <>
       <CitizenNavbar />
@@ -74,7 +113,7 @@ export default function ReportIssue() {
             Report an Issue
           </h1>
           <p className="text-gray-600 mt-2">
-            Report waste or cleanliness issues to help improve your community.
+            Help improve your community by reporting waste or cleanliness issues.
           </p>
         </div>
 
@@ -97,19 +136,19 @@ export default function ReportIssue() {
 
             <label
               htmlFor="imageUpload"
-              className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-45 cursor-pointer hover:border-green-500 transition overflow-hidden"
+              className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-40 cursor-pointer hover:border-green-500 transition overflow-hidden"
             >
               {preview ? (
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full h-full object-contain bg-gray-100"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="text-center text-gray-500">
                   <Upload className="mx-auto mb-2" />
                   <p className="text-sm">Click to upload or drag & drop</p>
-                  <p className="text-xs mt-1">JPG / PNG · Clear photo preferred</p>
+                  <p className="text-xs mt-1">JPG / PNG preferred</p>
                 </div>
               )}
             </label>
@@ -121,6 +160,8 @@ export default function ReportIssue() {
               Issue Title
             </label>
             <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               type="text"
               placeholder="e.g. Garbage piling near bus stop"
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
@@ -133,6 +174,8 @@ export default function ReportIssue() {
               Description
             </label>
             <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               rows="4"
               placeholder="Describe the issue in detail..."
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
@@ -152,7 +195,8 @@ export default function ReportIssue() {
 
             {coords && (
               <p className="text-xs text-gray-500 mt-2">
-                Selected location: {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+                Selected location: {coords.lat.toFixed(5)},{" "}
+                {coords.lng.toFixed(5)}
               </p>
             )}
           </div>
@@ -163,6 +207,8 @@ export default function ReportIssue() {
               Address (optional)
             </label>
             <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               type="text"
               placeholder="Area, road, landmark"
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
@@ -172,14 +218,12 @@ export default function ReportIssue() {
           {/* Submit */}
           <div className="pt-4">
             <button
-              disabled
-              className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold opacity-70 cursor-not-allowed"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-70"
             >
-              Submit Issue
+              {loading ? "Submitting..." : "Submit Issue"}
             </button>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              Submission will be enabled after backend integration
-            </p>
           </div>
 
         </div>

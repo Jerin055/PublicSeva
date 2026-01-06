@@ -1,4 +1,5 @@
 import Issue from "../models/Issue.js";
+import { getAISeverity } from "../services/aiSeverityService.js";
 
 /**
  * @desc    Create a new issue (post)
@@ -17,16 +18,20 @@ export const createIssue = async (req, res) => {
       });
     }
 
+    const aiSeverity = await getAISeverity(description);
+
     const issue = await Issue.create({
       title,
       description,
-      images: [req.file.path], 
+      images: [req.file.path],
       address,
       location: {
         type: "Point",
         coordinates: [Number(lng), Number(lat)]
       },
-      createdBy: req.user.id 
+      createdBy: req.user.id,
+      aiSeverity,
+      severityScore: aiSeverity.score
     });
 
     res.status(201).json({
@@ -34,7 +39,8 @@ export const createIssue = async (req, res) => {
       issue
     });
   } catch (err) {
-    console.error("CREATE ISSUE ERROR:", err.message);
+    console.error("CREATE ISSUE ERROR:", err);
+    console.error("Error stack:", err.stack);
     res.status(500).json({
       success: false,
       message: err.message

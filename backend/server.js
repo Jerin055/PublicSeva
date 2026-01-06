@@ -1,5 +1,5 @@
+import "dotenv/config"; // Auto-loads .env before other imports
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -8,16 +8,13 @@ import userRoutes from "./routes/userRoutes.js";
 import roleTestRoutes from "./routes/roleTestRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import issueRoutes from "./routes/issueRoutes.js";
-import uploadTestRoutes from "./routes/uploadTest.js";
-
-
-dotenv.config();
 connectDB();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Use passport based auth
 app.use(passport.initialize());
