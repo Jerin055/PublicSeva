@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CitizenHome from "./pages/citizen/Home";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import ReportIssue from "./pages/citizen/ReportIssue";
 
 
@@ -28,7 +29,7 @@ function App() {
           path="/admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <div>Admin Dashboard</div>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />
