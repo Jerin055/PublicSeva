@@ -103,3 +103,26 @@ export const deleteIssue = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+/**
+ * @desc    Update issue details
+ * @route   PATCH /api/admin/issues/:id
+ * @access  Admin
+ */
+export const updateIssue = async (req, res) => {
+  try {
+      const updated = await Issue.findByIdAndUpdate(
+        req.params.id,
+        {
+          title: req.body.title,
+          description: req.body.description,
+        },
+        { new: true }
+      );
+
+      res.json(updated);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to update issue" });
+    }
+};
