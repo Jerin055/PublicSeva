@@ -51,12 +51,20 @@ const issueSchema = new mongoose.Schema(
         enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
       },
       score: {
-        type: Number // mapped numeric score
+        type: Number, // AI score (max 40)
+        default: 0
       },
       reason: String
     },
 
-    /* 🔥 FINAL COMPUTED SEVERITY */
+    /* 🔥 SEVERITY SCORE BREAKDOWN */
+    severityBreakdown: {
+      aiScore: { type: Number, default: 0 },      // max 40
+      voteScore: { type: Number, default: 0 },    // max 30
+      timeScore: { type: Number, default: 0 }     // max 30
+    },
+
+    /* 🔥 FINAL COMPUTED SEVERITY (max 100) */
     severityScore: {
       type: Number,
       default: 0
