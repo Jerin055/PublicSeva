@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Leaf, Sun, Moon } from "lucide-react";
 import { logout } from "../utils/auth";
 
-export default function CitizenNavbar(
+export default function CitizenNavbar({
   mode = "citizen", // "citizen" | "admin"
   adminLinks = [],
-) {
+} = {}) {
   const navigate = useNavigate();
 
   // ✅ initialize correctly
