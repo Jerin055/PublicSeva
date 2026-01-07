@@ -12,6 +12,19 @@ import {
 
 import LeftSidebar from "../../components/map/sidebar/LeftSidebar";
 
+// Prevention of incorrect status changes
+const UI_TO_API_STATUS = {
+  untouched: "UNSOLVED",
+  in_progress: "IN_PROGRESS",
+  resolved: "RESOLVED",
+};
+
+const API_TO_UI_STATUS = {
+  UNSOLVED: "untouched",
+  IN_PROGRESS: "in_progress",
+  RESOLVED: "resolved",
+};
+
 
 export default function AdminDashboard() {
   // Left Sidebar state const
@@ -27,6 +40,13 @@ export default function AdminDashboard() {
     severity: "",
     location: "",
   });
+
+  // const to keep track of valid transitions
+  const isValidStatusTransition = (from, to) => {
+    if (from === "RESOLVED" && to !== "RESOLVED") return false;
+    return true;
+  };
+
 
   // User location parsing const
   const [myLocationActive, setMyLocationActive] = useState(false);
@@ -60,18 +80,53 @@ export default function AdminDashboard() {
   }, []);
 
   // UI-only status update
-  const handleStatusChange = async (id, status) => {
-    try {
-      await updateIssueStatus(id, status);
-      setIssues((prev) =>
-        prev.map((issue) =>
-          issue._id === id ? { ...issue, status } : issue
-        )
-      );
-    } catch (err) {
-      console.error("Status update failed", err);
-    }
-  };
+  const handleStatusChange = async (id, uiStatus) => {
+  const apiStatus = UI_TO_API_STATUS[uiStatus];
+
+  // 🚨 Guard 1: invalid mapping
+  if (!apiStatus) {
+    console.warn("Invalid status selected:", uiStatus);
+    return;
+  }
+
+  const issue = issues.find((i) => i._id === id);
+
+  // 🚨 Guard 2: issue not found
+  if (!issue) {
+    console.warn("Issue not found for status update:", id);
+    return;
+  }
+
+  // guard for invalid status change
+  if (!isValidStatusTransition(issue.status, apiStatus)) {
+    alert("Resolved issues cannot be moved back.");
+    return;
+  }
+
+
+  // 🚨 Guard 3: no-op (same status)
+  if (issue.status === apiStatus) {
+    console.info("Status unchanged, skipping API call");
+    return;
+  }
+
+  try {
+    await updateIssueStatus(id, apiStatus);
+
+    // Optimistic UI update
+    setIssues((prev) =>
+      prev.map((i) =>
+        i._id === id ? { ...i, status: apiStatus } : i
+      )
+    );
+  } catch (err) {
+    console.error("Status update failed", err);
+
+    // Optional: toast / alert later
+    alert("Failed to update issue status. Please try again.");
+  }
+};
+
 
   // UI-only edit save
   const handleEditSave = (id, data) => {
@@ -163,6 +218,21 @@ export default function AdminDashboard() {
         onLocationFound={(coords) => {
           console.log("Admin location:", coords);
         }}
+        onEditPost={(post) => {
+          const originalIssue = issues.find((i) => i._id === post.report_id);
+          setEditingIssue(originalIssue);
+        }}
+        onDeletePost={(id) => handleDelete(id)}
+        onStatusChange={(id, status) =>
+          handleStatusChange(
+            id,
+            status === "untouched"
+              ? "UNSOLVED"
+              : status === "in_progress"
+              ? "IN_PROGRESS"
+              : "RESOLVED"
+          )
+        }
       />
 
       {/* RIGHT: placeholder for map */}
