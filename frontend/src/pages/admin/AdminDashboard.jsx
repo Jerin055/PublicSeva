@@ -102,14 +102,81 @@ export default function AdminDashboard() {
     }
   };
 
+  // derived array to be used with the new Issue Schema
+  const sidebarPosts = issues.map((issue) => ({
+    // REQUIRED BY PostCard
+    report_id: issue._id,
+
+    description: issue.description,
+
+    images:
+      issue.images && issue.images.length > 0
+        ? issue.images
+        : ["https://placehold.co/400x300?text=No+Image"],
+
+    location: issue.address || "Unknown location",
+
+    // 🔑 STATUS MAPPING (VERY IMPORTANT)
+    status:
+      issue.status === "UNSOLVED"
+        ? "untouched"
+        : issue.status === "IN_PROGRESS"
+        ? "in_progress"
+        : "resolved",
+
+    // 🔥 SEVERITY (already computed backend-side)
+    severity: issue.severityScore ?? 0,
+
+    // COUNTS
+    votes: issue.votes?.length ?? 0,
+    reports: issue.comments?.length ?? 0,
+
+    // METADATA
+    createdAt: issue.createdAt,
+
+    // MAP (used later)
+    latitude: issue.location?.coordinates?.[1],
+    longitude: issue.location?.coordinates?.[0],
+  }));
+
+
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800">
       <AdminSidebar />
 
+      
+    {/* MAIN AREA */}
+    <div className="flex flex-1 relative">
+      {/* LEFT: Map-style Sidebar */}
+      <LeftSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        posts={sidebarPosts}
+        filters={filters}
+        onFilterChange={setFilters}
+        selectedPostId={selectedPostId}
+        onPostClick={(post) => {
+          setSelectedPostId(post.report_id);
+        }}
+        myLocationActive={myLocationActive}
+        onMyLocationToggle={setMyLocationActive}
+        onLocationFound={(coords) => {
+          console.log("Admin location:", coords);
+        }}
+      />
+
+      {/* RIGHT: placeholder for map */}
+      <div className="flex-1 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+        <p className="text-gray-500 text-sm">
+          Map view will appear here
+        </p>
+      </div>
+    </div>
+
       <main className="flex-1 p-8 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+        {/* <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
           Issue Moderation
-        </h1>
+        </h1> */}
 
         {/* loading guard */}
         {loading && (
@@ -117,7 +184,7 @@ export default function AdminDashboard() {
         )}
 
         {/* existing code preserved, just guarded */}
-        {!loading &&
+        {/* {!loading &&
           issues.map((issue) => (
             <AdminIssueCard
               key={issue._id}
@@ -126,7 +193,7 @@ export default function AdminDashboard() {
               onEdit={setEditingIssue}
               onDelete={handleDelete}
             />
-          ))}
+          ))} */}
       </main>
 
       {editingIssue && (
