@@ -1,0 +1,138 @@
+import React, { useMemo } from "react";
+import { X, Filter } from "lucide-react";
+import FilterPanel from "./FilterPanel";
+import MyLocationToggle from "./MyLocationToggle";
+import PostList from "./PostList";
+// import mockData from "../../../data/mockData.json";
+
+export default function LeftSidebar({
+    isOpen,
+    onClose,
+    posts,
+    filters,
+    onFilterChange,
+    selectedPostId,
+    onPostClick,
+    myLocationActive,
+    onMyLocationToggle,
+    onLocationFound,
+}) {
+    // Check if any filter is active
+    const hasActiveFilters = useMemo(() => {
+        return (
+            filters.reportId.trim() !== "" ||
+            filters.status !== "" ||
+            filters.severity !== "" ||
+            filters.location.trim() !== ""
+        );
+    }, [filters]);
+
+    // Apply filters - search ALL posts when filters are active, otherwise show clicked + nearby
+    const filteredPosts = useMemo(() => {
+        // Determine source: all posts if filters active, otherwise just sidebar posts
+        const sourceData = posts;
+
+        if (!sourceData || sourceData.length === 0) return [];
+
+        return sourceData.filter((post) => {
+            // If no filters active, show all from source
+            if (!hasActiveFilters) {
+                return true;
+            }
+
+            // OR logic: post matches if it matches ANY active filter
+            const matches = [];
+
+            if (filters.reportId.trim() !== "") {
+                matches.push(
+                    post.report_id.toLowerCase().includes(filters.reportId.toLowerCase())
+                );
+            }
+
+            if (filters.status !== "") {
+                matches.push(post.status === filters.status);
+            }
+
+            if (filters.severity !== "") {
+                const severity = post.severity;
+                if (filters.severity === "high") matches.push(severity >= 70);
+                else if (filters.severity === "moderate") matches.push(severity >= 40 && severity < 70);
+                else if (filters.severity === "low") matches.push(severity < 40);
+            }
+
+            if (filters.location.trim() !== "") {
+                matches.push(
+                    post.location.toLowerCase().includes(filters.location.toLowerCase())
+                );
+            }
+
+            // Return true if ANY filter matches (OR logic)
+            return matches.some((match) => match);
+        });
+    }, [posts, filters, hasActiveFilters]);
+
+    return (
+        <>
+            {/* Backdrop for mobile */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+                    onClick={onClose}
+                />
+            )}
+
+            {/* Sidebar - Wider width */}
+            <div
+                className={`
+                    fixed top-16 left-0 h-[calc(100vh-4rem)] z-30
+                    bg-white dark:bg-gray-800 shadow-xl
+                    transition-transform duration-300 ease-in-out
+                    w-full sm:w-[500px] lg:w-[480px]
+                    flex flex-col
+                    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+                `}
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-green-600 flex-shrink-0">
+                    <h2 className="text-lg font-semibold text-white">
+                        Waste Hotspots Reports
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Filters Header Row */}
+                <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                        <Filter size={16} className="text-green-600 dark:text-green-400" />
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filters</span>
+                        {hasActiveFilters && (
+                            <span className="text-xs text-green-600 dark:text-green-400"></span>
+                        )}
+                    </div>
+                    <MyLocationToggle
+                        isActive={myLocationActive}
+                        onToggle={onMyLocationToggle}
+                        onLocationFound={onLocationFound}
+                    />
+                </div>
+
+                {/* Filter Panel - Horizontal */}
+                <FilterPanel filters={filters} onFilterChange={onFilterChange} />
+
+                {/* Post List - Scrollable */}
+                <div className="flex-1 overflow-hidden">
+                    <PostList
+                        posts={filteredPosts}
+                        selectedPostId={selectedPostId}
+                        onPostClick={onPostClick}
+                    />
+                </div>
+            </div>
+        </>
+    );
+}
