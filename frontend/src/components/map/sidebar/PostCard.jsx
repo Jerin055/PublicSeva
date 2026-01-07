@@ -79,9 +79,10 @@ export default function PostCard({ post, isSelected, onClick }) {
                                     <Calendar size={10} />
                                     <span>{formatDate(post.createdAt)}</span>
                                 </div>
-                                <span className="text-sm font-mono font-bold text-green-600 dark:text-green-400">
-                                    {post.report_id}
-                                </span>
+                                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1">
+                                    {post.title}
+                                </h3>
+
                             </div>
                             {/* Vote & Report Counts - Right */}
                             <div className="flex flex-col items-end text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">
