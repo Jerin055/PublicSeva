@@ -164,6 +164,9 @@ export default function AdminDashboard() {
     // REQUIRED BY PostCard
     report_id: issue._id,
 
+    // main title for issue card (fetch from db)
+    title: issue.title,
+
     description: issue.description,
 
     images:
@@ -222,7 +225,7 @@ export default function AdminDashboard() {
         onFilterChange={setFilters}
         selectedPostId={selectedPostId}
         onPostClick={(post) => {
-          setSelectedPostId(post.report_id);
+          setSelectedPostId(post.title);
         }}
         myLocationActive={myLocationActive}
         onMyLocationToggle={setMyLocationActive}
