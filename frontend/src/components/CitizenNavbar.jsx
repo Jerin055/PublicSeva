@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Leaf, Sun, Moon } from "lucide-react";
 import { logout } from "../utils/auth";
 
-export default function CitizenNavbar() {
+export default function CitizenNavbar(
+  mode = "citizen", // "citizen" | "admin"
+  adminLinks = [],
+) {
   const navigate = useNavigate();
 
   // ✅ initialize correctly
@@ -43,11 +46,23 @@ export default function CitizenNavbar() {
             PublicSeva
           </div>
 
+          {/* Main controller logic */}
           <div className="flex gap-6 text-gray-700 dark:text-gray-200 font-medium">
-            <button onClick={() => navigate("/citizen/home")}>Home</button>
-            <button onClick={() => navigate("/citizen/status")}>Check Status</button>
-            <button onClick={() => navigate("/citizen/map")}>Map</button>
-            <button onClick={() => navigate("/citizen/profile")}>Profile</button>
+            {mode === "citizen" && (
+              <>
+                <button onClick={() => navigate("/citizen/home")}>Home</button>
+                <button onClick={() => navigate("/citizen/status")}>Check Status</button>
+                <button onClick={() => navigate("/citizen/map")}>Map</button>
+                <button onClick={() => navigate("/citizen/profile")}>Profile</button>
+              </>
+            )}
+
+            {mode === "admin" &&
+              adminLinks.map((link) => (
+                <button key={link.path} onClick={() => navigate(link.path)}>
+                  {link.label}
+                </button>
+              ))}
           </div>
         </div>
 

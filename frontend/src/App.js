@@ -5,10 +5,12 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CitizenHome from "./pages/citizen/Home";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ReportIssue from "./pages/citizen/ReportIssue";
 
 import Home from "./pages/citizen/Home";
 import Profile from "./pages/citizen/Profile";
-import ReportIssue from "./pages/citizen/ReportIssue";
 import CheckStatus from "./pages/citizen/CheckStatus";
 import MapView from "./pages/citizen/MapView";
 
@@ -80,7 +82,7 @@ function App() {
             path="/admin/dashboard"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <div className="p-10">Admin Dashboard</div>
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />

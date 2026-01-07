@@ -3,7 +3,9 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import { allowRoles } from "../middleware/roleMiddleware.js";
 import {
   getAllIssuesAdmin,
-  updateIssueStatus
+  updateIssueStatus,
+  deleteIssue,
+  updateIssue
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -27,5 +29,23 @@ router.patch(
   allowRoles("admin"),
   updateIssueStatus
 );
+
+/**
+ * Delete Issue from db
+ */
+router.delete(
+    "/issues/:id",
+    authMiddleware,
+    allowRoles("admin"), 
+    deleteIssue);
+
+/**
+ * Update Issue details
+ */
+router.patch(
+    "/issues/:id", 
+    authMiddleware,
+    allowRoles("admin"),
+    updateIssue);
 
 export default router;

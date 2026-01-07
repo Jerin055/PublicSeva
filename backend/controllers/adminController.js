@@ -87,3 +87,42 @@ export const updateIssueStatus = async (req, res) => {
     });
   }
 };
+
+export const deleteIssue = async (req, res) => {
+  try {
+    const issue = await Issue.findById(req.params.id);
+
+    if (!issue) {
+      return res.status(404).json({ message: "Issue not found" });
+    }
+
+    await issue.deleteOne();
+
+    res.json({ message: "Issue deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+/**
+ * @desc    Update issue details
+ * @route   PATCH /api/admin/issues/:id
+ * @access  Admin
+ */
+export const updateIssue = async (req, res) => {
+  try {
+      const updated = await Issue.findByIdAndUpdate(
+        req.params.id,
+        {
+          title: req.body.title,
+          description: req.body.description,
+        },
+        { new: true }
+      );
+
+      res.json(updated);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to update issue" });
+    }
+};
