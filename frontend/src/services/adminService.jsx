@@ -18,5 +18,8 @@ export const fetchAdminIssues = () => API.get("/issues");
 export const updateIssueStatus = (id, status) =>
   API.patch(`/issues/${id}/status`, { status });
 
+export const updateIssue = (id, data) =>
+  API.patch(`/issues/${id}`, data);
+
 export const deleteIssue = (id) =>
   API.delete(`/issues/${id}`);
