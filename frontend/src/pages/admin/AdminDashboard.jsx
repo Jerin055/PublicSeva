@@ -233,7 +233,7 @@ export default function AdminDashboard() {
         onFilterChange={setFilters}
         selectedPostId={selectedPostId}
         onPostClick={(post) => {
-          setSelectedPostId(post.title);
+          setSelectedPostId(post.report_id);
         }}
         myLocationActive={myLocationActive}
         onMyLocationToggle={setMyLocationActive}
