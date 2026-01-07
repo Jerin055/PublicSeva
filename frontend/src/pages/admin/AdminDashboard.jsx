@@ -199,16 +199,16 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
-  <CitizenNavbar
-    mode="admin"
-    adminLinks={[
-      { label: "Dashboard", path: "/admin/dashboard" },
-      { label: "Issues", path: "/admin/dashboard" },
-      { label: "Map View", path: "/admin/map" }, // future
-    ]}
-  />
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800">
-      <AdminSidebar />
+      <CitizenNavbar
+        mode="admin"
+        adminLinks={[
+          { label: "Dashboard", path: "/admin/dashboard" },
+          { label: "Issues", path: "/admin/dashboard" },
+          { label: "Map View", path: "/admin/map" }, // future
+        ]}
+      />
+      {/* <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800">
+      <AdminSidebar /> */}
 
       
     {/* MAIN AREA */}
@@ -292,6 +292,6 @@ export default function AdminDashboard() {
         />
       )}
     </div>
-    </div>
+    // </div>
   );
 }
