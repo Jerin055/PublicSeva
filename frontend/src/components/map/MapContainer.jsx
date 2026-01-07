@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState, useCallback, useImperativeHandle, f
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Supercluster from "supercluster";
-import mockData from "../../data/mockData.json";
 import SearchBar from "./SearchBar";
 import StatusFilter from "./StatusFilter";
 
@@ -30,8 +29,14 @@ const getDistanceInMeters = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
-const MapContainer = forwardRef(function MapContainer(
-  { statusFilter, setStatusFilter, darkMode, onMarkerClick, highlightedPostId },
+const MapContainer = forwardRef(function MapContainer({ 
+        data = [],
+        statusFilter, 
+        setStatusFilter, 
+        darkMode, 
+        onMarkerClick, 
+        highlightedPostId 
+    },
   ref
 ) {
   const mapContainer = useRef(null);
@@ -41,12 +46,12 @@ const MapContainer = forwardRef(function MapContainer(
   const updateTimeoutRef = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const API_KEY = process.env.REACT_APP_MAPTILER_API_KEY;
+  const API_KEY = process.env.REACT_APP_MAPTILER_KEY;
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     flyToPost: (postId) => {
-      const post = mockData.find((p) => p.report_id === postId);
+      const post = data.find((p) => p.report_id === postId);
       if (post && map.current) {
         map.current.flyTo({
           center: [post.longitude, post.latitude],
@@ -65,7 +70,7 @@ const MapContainer = forwardRef(function MapContainer(
       }
     },
     getNearbyPosts: (clickedPost, radiusMeters = 500) => {
-      return mockData.filter((post) => {
+      return data.filter((post) => {
         if (post.report_id === clickedPost.report_id) return true;
         const distance = getDistanceInMeters(
           clickedPost.latitude,
@@ -90,7 +95,7 @@ const MapContainer = forwardRef(function MapContainer(
 
   // Initialize Supercluster when data or filter changes
   useEffect(() => {
-    const filteredData = mockData.filter((point) => statusFilter[point.status]);
+    const filteredData = data.filter((point) => statusFilter[point.status]);
 
     const features = filteredData.map((point) => ({
       type: "Feature",
