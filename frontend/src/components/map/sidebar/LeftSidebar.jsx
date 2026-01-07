@@ -16,6 +16,11 @@ export default function LeftSidebar({
     myLocationActive,
     onMyLocationToggle,
     onLocationFound,
+
+    // admin controls
+    onEditPost,
+    onDeletePost,
+    onStatusChange,
 }) {
     // Check if any filter is active
     const hasActiveFilters = useMemo(() => {
@@ -26,6 +31,13 @@ export default function LeftSidebar({
             filters.location.trim() !== ""
         );
     }, [filters]);
+
+    // const to retrieve the current selected issue
+    const selectedPost = useMemo(
+        () => posts.find((p) => p.report_id === selectedPostId),
+        [posts, selectedPostId]
+    );
+
 
     // Apply filters - search ALL posts when filters are active, otherwise show clicked + nearby
     const filteredPosts = useMemo(() => {
@@ -123,6 +135,57 @@ export default function LeftSidebar({
 
                 {/* Filter Panel - Horizontal */}
                 <FilterPanel filters={filters} onFilterChange={onFilterChange} />
+
+                {/* Admin Action panel */}
+                {selectedPost && (
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    Admin Actions
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                    ID: {selectedPost.report_id.slice(-6)}
+                                </span>
+                            </div>
+
+                            {/* Status Change */}
+                            <select
+                                value={selectedPost.status}
+                                onChange={(e) =>
+                                    onStatusChange?.(selectedPost.report_id, e.target.value)
+                                }
+                                className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md
+                                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                                        focus:ring-2 focus:ring-green-500 outline-none"
+                            >
+                                <option value="untouched">Untouched</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 pt-1">
+                                <button
+                                    onClick={() => onEditPost?.(selectedPost)}
+                                    className="flex-1 px-3 py-1.5 text-sm rounded-md
+                                            bg-green-600 text-white hover:bg-green-700 transition"
+                                >
+                                    Edit
+                                </button>
+
+                                <button
+                                    onClick={() => onDeletePost?.(selectedPost.report_id)}
+                                    className="flex-1 px-3 py-1.5 text-sm rounded-md
+                                            bg-red-500 text-white hover:bg-red-600 transition"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
 
                 {/* Post List - Scrollable */}
                 <div className="flex-1 overflow-hidden">
