@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import AdminSidebar from "./AdminSidebar";
-import AdminIssueCard from "./AdminIssueCard";
 import AdminEditModal from "./AdminEditModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import {
@@ -13,6 +11,8 @@ import {
 import LeftSidebar from "../../components/map/sidebar/LeftSidebar";
 import CitizenNavbar from "../../components/CitizenNavbar";
 
+// Map container to be used
+import MapContainer from "../../components/map/MapContainer";
 
 // Prevention of incorrect status changes
 const UI_TO_API_STATUS = {
@@ -42,6 +42,14 @@ export default function AdminDashboard() {
     severity: "",
     location: "",
   });
+
+  // admin local map state
+  const [statusFilter, setStatusFilter] = useState({
+    untouched: true,
+    in_progress: true,
+    resolved: true,
+  });
+
 
   // const to keep track of valid transitions
   const isValidStatusTransition = (from, to) => {
@@ -250,10 +258,17 @@ export default function AdminDashboard() {
       />
 
       {/* RIGHT: placeholder for map */}
-      <div className="flex-1 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-        <p className="text-gray-500 text-sm">
-          Map view will appear here
-        </p>
+      <div className="flex-1 relative">
+        <MapContainer
+          data={sidebarPosts}               // 🔑 REAL DATA
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          darkMode={document.documentElement.classList.contains("dark")}
+          highlightedPostId={selectedPostId}
+          onMarkerClick={(post) => {
+            setSelectedPostId(post.report_id);
+          }}
+        />
       </div>
     </div>
 
