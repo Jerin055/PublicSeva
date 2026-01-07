@@ -11,6 +11,8 @@ import {
 } from "../../services/adminService";
 
 import LeftSidebar from "../../components/map/sidebar/LeftSidebar";
+import CitizenNavbar from "../../components/CitizenNavbar";
+
 
 // Prevention of incorrect status changes
 const UI_TO_API_STATUS = {
@@ -196,6 +198,15 @@ export default function AdminDashboard() {
 
 
   return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
+  <CitizenNavbar
+    mode="admin"
+    adminLinks={[
+      { label: "Dashboard", path: "/admin/dashboard" },
+      { label: "Issues", path: "/admin/dashboard" },
+      { label: "Map View", path: "/admin/map" }, // future
+    ]}
+  />
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800">
       <AdminSidebar />
 
@@ -280,6 +291,7 @@ export default function AdminDashboard() {
           onCancel={() => setDeleteTarget(null)}
         />
       )}
+    </div>
     </div>
   );
 }
