@@ -1,5 +1,25 @@
 import Issue from "../models/Issue.js";
 import { getAISeverity } from "../services/aiSeverityService.js";
+import {
+  calculateVoteScore,
+  calculateTimeScore,
+  calculateTotalSeverity
+} from "../utils/severityEngine.js";
+
+/**
+ * Helper: Update severity score for an issue
+ */
+async function updateIssueSeverity(issue) {
+  const aiScore = issue.aiSeverity?.score || 0;
+  const voteScore = calculateVoteScore(issue.votes?.length || 0);
+  const timeScore = calculateTimeScore(issue.createdAt);
+  const totalScore = aiScore + voteScore + timeScore;
+
+  issue.severityBreakdown = { aiScore, voteScore, timeScore };
+  issue.severityScore = totalScore;
+
+  return issue;
+}
 
 /**
  * @desc    Create a new issue (post)
@@ -20,6 +40,10 @@ export const createIssue = async (req, res) => {
 
     const aiSeverity = await getAISeverity(description);
 
+    // Initial time score (just created = 5 points)
+    const initialTimeScore = 5;
+    const initialTotalScore = aiSeverity.score + 0 + initialTimeScore; // 0 votes at creation
+
     const issue = await Issue.create({
       title,
       description,
@@ -31,7 +55,12 @@ export const createIssue = async (req, res) => {
       },
       createdBy: req.user.id,
       aiSeverity,
-      severityScore: aiSeverity.score
+      severityBreakdown: {
+        aiScore: aiSeverity.score,
+        voteScore: 0,
+        timeScore: initialTimeScore
+      },
+      severityScore: initialTotalScore
     });
 
     res.status(201).json({
@@ -49,7 +78,7 @@ export const createIssue = async (req, res) => {
 };
 
 /**
- * @desc    Get all issues (feed)
+ * @desc    Get all issues (feed) - also updates time-based severity
  * @route   GET /api/issues
  * @access  Public
  */
@@ -59,9 +88,24 @@ export const getAllIssues = async (req, res) => {
       .populate("createdBy", "name role")
       .sort({ createdAt: -1 });
 
+    // Recalculate time score for each issue (time changes!)
+    const updatedIssues = await Promise.all(
+      issues.map(async (issue) => {
+        const currentTimeScore = calculateTimeScore(issue.createdAt);
+        const storedTimeScore = issue.severityBreakdown?.timeScore || 0;
+
+        // Only update if time score has changed
+        if (currentTimeScore !== storedTimeScore) {
+          await updateIssueSeverity(issue);
+          await issue.save();
+        }
+        return issue;
+      })
+    );
+
     res.json({
       success: true,
-      issues
+      issues: updatedIssues
     });
   } catch (err) {
     res.status(500).json({
@@ -102,6 +146,45 @@ export const getIssueById = async (req, res) => {
 };
 
 /**
+ * @desc    Get current user's issues - also updates time-based severity
+ * @route   GET /api/issues/my
+ * @access  Authenticated
+ */
+export const getMyIssues = async (req, res) => {
+  try {
+    const issues = await Issue.find({
+      createdBy: req.user.id
+    })
+      .populate("createdBy", "name role")
+      .sort({ createdAt: -1 });
+
+    // Recalculate time score for each issue
+    const updatedIssues = await Promise.all(
+      issues.map(async (issue) => {
+        const currentTimeScore = calculateTimeScore(issue.createdAt);
+        const storedTimeScore = issue.severityBreakdown?.timeScore || 0;
+
+        if (currentTimeScore !== storedTimeScore) {
+          await updateIssueSeverity(issue);
+          await issue.save();
+        }
+        return issue;
+      })
+    );
+
+    res.json({
+      success: true,
+      issues: updatedIssues
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+};
+
+/**
  * @desc    Get issues by user
  * @route   GET /api/issues/user/:userId
  * @access  Public
@@ -125,7 +208,7 @@ export const getIssuesByUser = async (req, res) => {
 };
 
 /**
- * @desc    Like or unlike an issue
+ * @desc    Like or unlike an issue - updates severity score
  * @route   POST /api/issues/:id/like
  * @access  Authenticated
  */
@@ -137,20 +220,24 @@ export const toggleLike = async (req, res) => {
     }
 
     const userId = req.user.id;
-    const liked = issue.likes.includes(userId);
+    const voted = issue.votes.includes(userId);
 
-    if (liked) {
-      issue.likes.pull(userId);
+    if (voted) {
+      issue.votes.pull(userId);
     } else {
-      issue.likes.push(userId);
+      issue.votes.push(userId);
     }
 
+    // Recalculate severity after vote change
+    await updateIssueSeverity(issue);
     await issue.save();
 
     res.json({
       success: true,
-      liked: !liked,
-      totalLikes: issue.likes.length
+      liked: !voted,
+      totalLikes: issue.votes.length,
+      severityScore: issue.severityScore,
+      severityBreakdown: issue.severityBreakdown
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

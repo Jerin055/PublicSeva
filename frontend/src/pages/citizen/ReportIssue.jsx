@@ -43,6 +43,9 @@ export default function ReportIssue() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        // Guard: ensure container still exists (component may have unmounted)
+        if (!mapContainerRef.current) return;
+
         const lng = position.coords.longitude;
         const lat = position.coords.latitude;
 
