@@ -260,7 +260,7 @@ export default function AdminDashboard() {
       {/* RIGHT: placeholder for map */}
       <div className="flex-1 relative">
         <MapContainer
-          data={sidebarPosts}               // 🔑 REAL DATA
+          data={sidebarPosts}          // 🔑 DB DATA
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           darkMode={document.documentElement.classList.contains("dark")}
